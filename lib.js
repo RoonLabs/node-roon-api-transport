@@ -41,6 +41,7 @@ RoonApiTransport.prototype.pause_all = function(cb) {
                                });
 };
 RoonApiTransport.prototype.mute = function(z, how, cb) {
+    if (!z) { if (cb) cb(false); return; }
     this.core.moo.send_request(SVCNAME+"/mute",
                                {
                                    output_id: oid(z),
@@ -52,6 +53,7 @@ RoonApiTransport.prototype.mute = function(z, how, cb) {
                                });
 };
 RoonApiTransport.prototype.change_volume = function(z, how, value, cb) {
+    if (!z) { if (cb) cb(false); return; }
     this.core.moo.send_request(SVCNAME+"/change_volume",
                                {
                                    output_id: oid(z),
@@ -64,6 +66,7 @@ RoonApiTransport.prototype.change_volume = function(z, how, value, cb) {
                                });
 };
 RoonApiTransport.prototype.seek = function(z, how, seconds, cb) {
+    if (!z) { if (cb) cb(false); return; }
     this.core.moo.send_request(SVCNAME+"/seek",
                                {
                                    zone_or_output_id: zoid(z),
@@ -76,6 +79,7 @@ RoonApiTransport.prototype.seek = function(z, how, seconds, cb) {
                                });
 };
 RoonApiTransport.prototype.control = function(z, control, cb) {
+    if (!z) { if (cb) cb(false); return; }
     this.core.moo.send_request(SVCNAME+"/control",
                                {
                                    zone_or_output_id: zoid(z),
@@ -87,6 +91,7 @@ RoonApiTransport.prototype.control = function(z, control, cb) {
                                });
 };
 RoonApiTransport.prototype.transfer_zone = function(fromz, toz, cb) {
+    if (!fromz || !toz) { if (cb) cb(false); return; }
     this.core.moo.send_request(SVCNAME+"/transfer_zone",
                                {
                                    from_zone_or_output_id: zoid(fromz),
@@ -98,6 +103,7 @@ RoonApiTransport.prototype.transfer_zone = function(fromz, toz, cb) {
                                });
 };
 RoonApiTransport.prototype.group_outputs = function(outputs, cb) {
+    if (!outputs) { if (cb) cb(false); return; }
     this.core.moo.send_request(SVCNAME+"/group_outputs",
                                {
                                    output_ids: outputs.reduce((p,e) => p.push(oid(e)) && p, []),
@@ -108,6 +114,7 @@ RoonApiTransport.prototype.group_outputs = function(outputs, cb) {
                                });
 };
 RoonApiTransport.prototype.ungroup_outputs = function(outputs, cb) {
+    if (!outputs) { if (cb) cb(false); return; }
     this.core.moo.send_request(SVCNAME+"/ungroup_outputs",
                                {
                                    output_ids: outputs.reduce((p,e) => p.push(oid(e)) && p, []),
@@ -118,6 +125,7 @@ RoonApiTransport.prototype.ungroup_outputs = function(outputs, cb) {
                                });
 };
 RoonApiTransport.prototype.change_settings = function(z, settings, cb) {
+    if (!z) { if (cb) cb(false); return; }
     settings = Object.assign({ zone_or_output_id: zoid(z) }, settings);
     this.core.moo.send_request(SVCNAME+"/change_settings",
                                settings,
