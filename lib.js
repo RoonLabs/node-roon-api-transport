@@ -13,12 +13,21 @@ function zoid(zo) {
 }
 
 
+/**
+ * Roon API Transport Service
+ * @class RoonApiTransport
+ * @param {Core} core - The Core providing the service
+ */
 function RoonApiTransport(core) {
     this.core = core;
 }
 
 RoonApiTransport.services = [ { name: SVCNAME } ];
 
+/**
+ * Mute all zones.
+ * @param {RoonApiTransport~resultcallback} [cb] - Called on success or error
+ */
 RoonApiTransport.prototype.mute_all = function(cb) {
     this.core.moo.send_request(SVCNAME+"/mute_all",
                                (msg, body) => {
@@ -26,6 +35,10 @@ RoonApiTransport.prototype.mute_all = function(cb) {
                                        cb(msg && msg.name == "Success" ? false : (msg ? msg.name : "NetworkError"));
                                });
 };
+/**
+ * Unmute all zones.
+ * @param {RoonApiTransport~resultcallback} [cb] - Called on success or error
+ */
 RoonApiTransport.prototype.unmute_all = function(cb) {
     this.core.moo.send_request(SVCNAME+"/unmute_all",
                                (msg, body) => {
@@ -33,6 +46,10 @@ RoonApiTransport.prototype.unmute_all = function(cb) {
                                        cb(msg && msg.name == "Success" ? false : (msg ? msg.name : "NetworkError"));
                                });
 };
+/**
+ * Pause all zones.
+ * @param {RoonApiTransport~resultcallback} [cb] - Called on success or error
+ */
 RoonApiTransport.prototype.pause_all = function(cb) {
     this.core.moo.send_request(SVCNAME+"/pause_all",
                                (msg, body) => {
@@ -40,6 +57,12 @@ RoonApiTransport.prototype.pause_all = function(cb) {
                                        cb(msg && msg.name == "Success" ? false : (msg ? msg.name : "NetworkError"));
                                });
 };
+/**
+ * Mute/unmute a zone.
+ * @param {Zone} zone - The zone to mute.
+ * @param {('mute'|'unmute')} how - The action to take
+ * @param {RoonApiTransport~resultcallback} [cb] - Called on success or error
+ */
 RoonApiTransport.prototype.mute = function(z, how, cb) {
     if (!z) { if (cb) cb(false); return; }
     this.core.moo.send_request(SVCNAME+"/mute",
@@ -52,19 +75,33 @@ RoonApiTransport.prototype.mute = function(z, how, cb) {
                                        cb(msg && msg.name == "Success" ? false : (msg ? msg.name : "NetworkError"));
                                });
 };
-RoonApiTransport.prototype.change_volume = function(z, how, value, cb) {
+/**
+ * Change the volume of a zone.
+ * @param {Zone} zone - The zone
+ * @param {('absolute'|'relative'|'relative_step')} how - How to interpret the volume
+ * @param {number} volume - The new volume value, or the increment value or step
+ * @param {RoonApiTransport~resultcallback} [cb] - Called on success or error
+ */
+RoonApiTransport.prototype.change_volume = function(z, how, seconds, cb) {
     if (!z) { if (cb) cb(false); return; }
     this.core.moo.send_request(SVCNAME+"/change_volume",
                                {
                                    output_id: oid(z),
                                    how:       how,
-                                   value:     value
+                                   seconds:   seconds
                                },
                                (msg, body) => {
                                    if (cb)
                                        cb(msg && msg.name == "Success" ? false : (msg ? msg.name : "NetworkError"));
                                });
 };
+/**
+ * Seek to a time position within the now playing media
+ * @param {Zone} zone - The zone
+ * @param {('relative'|'absolute')} how - How to interpret the target seek position
+ * @param {number} seconds - The target seek position
+ * @param {RoonApiTransport~resultcallback} [cb] - Called on success or error
+ */
 RoonApiTransport.prototype.seek = function(z, how, seconds, cb) {
     if (!z) { if (cb) cb(false); return; }
     this.core.moo.send_request(SVCNAME+"/seek",
@@ -78,6 +115,24 @@ RoonApiTransport.prototype.seek = function(z, how, seconds, cb) {
                                        cb(msg && msg.name == "Success" ? false : (msg ? msg.name : "NetworkError"));
                                });
 };
+/**
+ * Execute a transport control on a zone.
+ *
+ * <p>Be sure that `is_<control>_allowed` is true on your {Zone} before allowing the user to operate controls</p>
+ *
+ * @param {Zone} zone - The zone
+ * @param {('play'|'pause'|'playpause'|'stop'|'previous'|'next')} control - The control desired
+ * <pre>
+ * "play" - If paused or stopped, start playback
+ * "pause" - If playing or loading, pause playback
+ * "playpause" - If paused or stopped, start playback. If playing or loading, pause playback.
+ * "stop" - Stop playback and release the audio device immediately
+ * "previous" - Go to the start of the current track, or to the previous track
+ * "next" - Advance to the next track
+ * </pre>
+ *
+ * @param {RoonApiTransport~resultcallback} [cb] - Called on success or error
+ */
 RoonApiTransport.prototype.control = function(z, control, cb) {
     if (!z) { if (cb) cb(false); return; }
     this.core.moo.send_request(SVCNAME+"/control",
@@ -90,6 +145,13 @@ RoonApiTransport.prototype.control = function(z, control, cb) {
                                        cb(msg && msg.name == "Success" ? false : (msg ? msg.name : "NetworkError"));
                                });
 };
+/**
+ * Transfer the current queue from one zone to another
+ *
+ * @param {Zone} fromz - The source zone
+ * @param {Zone} toz - The destination zone
+ * @param {RoonApiTransport~resultcallback} [cb] - Called on success or error
+ */
 RoonApiTransport.prototype.transfer_zone = function(fromz, toz, cb) {
     if (!fromz || !toz) { if (cb) cb(false); return; }
     this.core.moo.send_request(SVCNAME+"/transfer_zone",
@@ -102,6 +164,12 @@ RoonApiTransport.prototype.transfer_zone = function(fromz, toz, cb) {
                                        cb(msg && msg.name == "Success" ? false : (msg ? msg.name : "NetworkError"));
                                });
 };
+/**
+ * Create a group of synchronized zones
+ *
+ * @param {Zone[]} outputs - The zones to group. The first zone's queue is preserved.
+ * @param {RoonApiTransport~resultcallback} [cb] - Called on success or error
+ */
 RoonApiTransport.prototype.group_outputs = function(outputs, cb) {
     if (!outputs) { if (cb) cb(false); return; }
     this.core.moo.send_request(SVCNAME+"/group_outputs",
@@ -113,6 +181,12 @@ RoonApiTransport.prototype.group_outputs = function(outputs, cb) {
                                        cb(msg && msg.name == "Success" ? false : (msg ? msg.name : "NetworkError"));
                                });
 };
+/**
+ * Ungroup zones
+ *
+ * @param {Zone[]} outputs - The zones to ungroup.
+ * @param {RoonApiTransport~resultcallback} [cb] - Called on success or error
+ */
 RoonApiTransport.prototype.ungroup_outputs = function(outputs, cb) {
     if (!outputs) { if (cb) cb(false); return; }
     this.core.moo.send_request(SVCNAME+"/ungroup_outputs",
