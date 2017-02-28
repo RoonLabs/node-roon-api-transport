@@ -79,16 +79,16 @@ RoonApiTransport.prototype.mute = function(z, how, cb) {
  * Change the volume of a zone.
  * @param {Zone} zone - The zone
  * @param {('absolute'|'relative'|'relative_step')} how - How to interpret the volume
- * @param {number} volume - The new volume value, or the increment value or step
+ * @param {number} value - The new volume value, or the increment value or step
  * @param {RoonApiTransport~resultcallback} [cb] - Called on success or error
  */
-RoonApiTransport.prototype.change_volume = function(z, how, seconds, cb) {
+RoonApiTransport.prototype.change_volume = function(z, how, value, cb) {
     if (!z) { if (cb) cb(false); return; }
     this.core.moo.send_request(SVCNAME+"/change_volume",
                                {
                                    output_id: oid(z),
                                    how:       how,
-                                   seconds:   seconds
+                                   value:     value
                                },
                                (msg, body) => {
                                    if (cb)
