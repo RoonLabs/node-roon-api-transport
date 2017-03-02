@@ -12,6 +12,58 @@ function zoid(zo) {
     return zo.zone_id;
 }
 
+/**
+ * Roon API Transport Service: Zone
+ * @class Zone
+ * @property {string}  zone_id
+ * @property {string}  display_name - Display Name for this zone
+ * @property {Output[]}  ouputs - The outputs in this zone
+ * @property {('playing'|'paused'|'loading'|'stopped')} state
+ * @property {number} [seek_poisition] - Current seek position for the zone
+ * @property {boolean} is_previous_allowed - Indicates whether the "previous" control is supported
+ * @property {boolean} is_next_allowed - Indicates whether the "next" control is supported
+ * @property {boolean} is_pause_allowed - Indicates whether the "pause" control is supported
+ * @property {boolean} is_play_allowed - Indicates whether the "play" control is supported
+ * @property {boolean} is_seek_allowed - Indicates whether the "seek" control is supported
+ * @property {object}  [settings]               - The default values for parties.
+ * @property {('loop'|'loop_one'|'disabled')} settings.loop - loop setting on the zone
+ * @property {boolean}  settings.shuffle - indicates whether shuffle is enabled on the zone
+ * @property {boolean}  settings.auto_radio - indicates whether auto-radio mode is enabled on the zone
+ * @property {object}  [now_playing] - Now-playing information for this zone, if playback is active
+ * @property {number}  [now_playing.seek_position] - Seek Position in seconds, if applicable
+ * @property {number}  [now_playing.length] - Length of media in seconds, if applicable
+ * @property {string}  [now_playing.image_key] - Now-playing image
+ * @property {object}  now_playing.one_line - Display text for one-line displays
+ * @property {object}  now_playing.one_line.line1
+ * @property {object}  now_playing.two_line - Display text for two-line displays
+ * @property {object}  now_playing.two_line.line1
+ * @property {object}  [now_playing.two_line.line2]
+ * @property {object}  now_playing.three_line - Display text for three-line displays
+ * @property {object}  now_playing.three_line.line1
+ * @property {object}  [now_playing.three_line.line2]
+ * @property {object}  [now_playing.three_line.line3]
+ */
+
+/**
+ * Roon API Transport Service: Output
+ * @class Output
+ * @property {string}  output_id
+ * @property {string}  zone_id - The zone that this output is a part of
+ * @property {string}  display_name - Display Name for this output
+ * @property {('playing'|'paused'|'loading'|'stopped')} state
+ * @property {object}  [source_controls]               - The default values for parties.
+ * @property {string}  source_controls.display_name - Display Name for this source control
+ * @property {('selected'|'deselected'|'standby'|'indeterminate')} source_controls.status
+ * @property {boolean}  source_controls.supports_standby - true if this source control supports standby
+ *
+ * @property {object}  [volume] - This field is populated for outputs that support volume control
+ * @property {('number'|'db'|*)}  [volume.type] - If you receive an unanticipated value for this, treat it like "number"
+ * @property {number}  [volume.min] - The minimum value in the volume range
+ * @property {number}  [volume.max] - The maximum value in the volume range
+ * @property {number}  [volume.value] - The current value of the volume control
+ * @property {number}  [volume.step] - The step size for the volume control, in terms of its native units
+ * @property {boolean}  [volume.is_muted] - True if the zone is muted, false otherwise
+ */
 
 /**
  * Roon API Transport Service
@@ -25,22 +77,15 @@ function RoonApiTransport(core) {
 RoonApiTransport.services = [ { name: SVCNAME } ];
 
 /**
- * Mute all zones.
+ * Mute/unmute all zones (that are mutable).
+ * @param {('mute'|'unmute')} how - The action to take
  * @param {RoonApiTransport~resultcallback} [cb] - Called on success or error
  */
-RoonApiTransport.prototype.mute_all = function(cb) {
+RoonApiTransport.prototype.mute_all = function(how, cb) {
     this.core.moo.send_request(SVCNAME+"/mute_all",
-                               (msg, body) => {
-                                   if (cb)
-                                       cb(msg && msg.name == "Success" ? false : (msg ? msg.name : "NetworkError"));
-                               });
-};
-/**
- * Unmute all zones.
- * @param {RoonApiTransport~resultcallback} [cb] - Called on success or error
- */
-RoonApiTransport.prototype.unmute_all = function(cb) {
-    this.core.moo.send_request(SVCNAME+"/unmute_all",
+                               {
+                                   how:       how
+                               },
                                (msg, body) => {
                                    if (cb)
                                        cb(msg && msg.name == "Success" ? false : (msg ? msg.name : "NetworkError"));
@@ -58,16 +103,16 @@ RoonApiTransport.prototype.pause_all = function(cb) {
                                });
 };
 /**
- * Mute/unmute a zone.
- * @param {Zone} zone - The zone to mute.
+ * Mute/unmute an output.
+ * @param {Output} output - The output to mute.
  * @param {('mute'|'unmute')} how - The action to take
  * @param {RoonApiTransport~resultcallback} [cb] - Called on success or error
  */
-RoonApiTransport.prototype.mute = function(z, how, cb) {
+RoonApiTransport.prototype.mute = function(output, how, cb) {
     if (!z) { if (cb) cb(false); return; }
     this.core.moo.send_request(SVCNAME+"/mute",
                                {
-                                   output_id: oid(z),
+                                   output_id: oid(output),
                                    how:       how
                                },
                                (msg, body) => {
@@ -76,17 +121,20 @@ RoonApiTransport.prototype.mute = function(z, how, cb) {
                                });
 };
 /**
- * Change the volume of a zone.
- * @param {Zone} zone - The zone
+ * Change the volume of an output. Grouped zones can have differently behaving
+ * volume systems (dB, min/max, steps, etc..), so you have to change the volume
+ * different for each of those outputs.
+ *
+ * @param {Output} output - The output to change the volume on.
  * @param {('absolute'|'relative'|'relative_step')} how - How to interpret the volume
  * @param {number} value - The new volume value, or the increment value or step
  * @param {RoonApiTransport~resultcallback} [cb] - Called on success or error
  */
-RoonApiTransport.prototype.change_volume = function(z, how, value, cb) {
+RoonApiTransport.prototype.change_volume = function(output, how, value, cb) {
     if (!z) { if (cb) cb(false); return; }
     this.core.moo.send_request(SVCNAME+"/change_volume",
                                {
-                                   output_id: oid(z),
+                                   output_id: oid(output),
                                    how:       how,
                                    value:     value
                                },
@@ -97,7 +145,7 @@ RoonApiTransport.prototype.change_volume = function(z, how, value, cb) {
 };
 /**
  * Seek to a time position within the now playing media
- * @param {Zone} zone - The zone
+ * @param {Zone} zone - The zone or output
  * @param {('relative'|'absolute')} how - How to interpret the target seek position
  * @param {number} seconds - The target seek position
  * @param {RoonApiTransport~resultcallback} [cb] - Called on success or error
@@ -120,7 +168,7 @@ RoonApiTransport.prototype.seek = function(z, how, seconds, cb) {
  *
  * <p>Be sure that `is_<control>_allowed` is true on your {Zone} before allowing the user to operate controls</p>
  *
- * @param {Zone} zone - The zone
+ * @param {Zone} zone - The zone or output
  * @param {('play'|'pause'|'playpause'|'stop'|'previous'|'next')} control - The control desired
  * <pre>
  * "play" - If paused or stopped, start playback
@@ -148,8 +196,8 @@ RoonApiTransport.prototype.control = function(z, control, cb) {
 /**
  * Transfer the current queue from one zone to another
  *
- * @param {Zone} fromz - The source zone
- * @param {Zone} toz - The destination zone
+ * @param {Zone} fromzone - The source zone or output
+ * @param {Zone} tozone - The destination zone or output
  * @param {RoonApiTransport~resultcallback} [cb] - Called on success or error
  */
 RoonApiTransport.prototype.transfer_zone = function(fromz, toz, cb) {
@@ -165,9 +213,9 @@ RoonApiTransport.prototype.transfer_zone = function(fromz, toz, cb) {
                                });
 };
 /**
- * Create a group of synchronized zones
+ * Create a group of synchronized audio outputs
  *
- * @param {Zone[]} outputs - The zones to group. The first zone's queue is preserved.
+ * @param {Output[]} outputs - The outputs to group. The first output's zone's queue is preserved.
  * @param {RoonApiTransport~resultcallback} [cb] - Called on success or error
  */
 RoonApiTransport.prototype.group_outputs = function(outputs, cb) {
@@ -182,9 +230,9 @@ RoonApiTransport.prototype.group_outputs = function(outputs, cb) {
                                });
 };
 /**
- * Ungroup zones
+ * Ungroup outputs previous grouped
  *
- * @param {Zone[]} outputs - The zones to ungroup.
+ * @param {Output[]} outputs - The outputs to ungroup.
  * @param {RoonApiTransport~resultcallback} [cb] - Called on success or error
  */
 RoonApiTransport.prototype.ungroup_outputs = function(outputs, cb) {
@@ -198,6 +246,16 @@ RoonApiTransport.prototype.ungroup_outputs = function(outputs, cb) {
                                        cb(msg && msg.name == "Success" ? false : (msg ? msg.name : "NetworkError"));
                                });
 };
+/**
+ * Change zone settings
+ *
+ * @param {Zone} zone - The zone or output
+ * @param {object} settings - The settings to change
+ * @param {boolean} [settings.shuffle] - If present, sets shuffle mode to the specified value
+ * @param {boolean} [settings.auto_radio] - If present, sets auto_radio mode to the specified value
+ * @param {('loop'|'loop_one'|'disabled'|'next')} [settings.loop] - If present, sets loop mode to the specified value. 'next' will cycle between the settings.
+ * @param {RoonApiTransport~resultcallback} [cb] - Called on success or error
+ */
 RoonApiTransport.prototype.change_settings = function(z, settings, cb) {
     if (!z) { if (cb) cb(false); return; }
     settings = Object.assign({ zone_or_output_id: zoid(z) }, settings);
