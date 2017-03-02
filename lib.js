@@ -7,7 +7,7 @@ function oid(o) {
     return o.output_id;
 }
 function zoid(zo) {
-    if (typeof(o) == 'string') return o;
+    if (typeof(zo) == 'string') return zo;
     if (zo.output_id) return zo.output_id;
     return zo.zone_id;
 }
