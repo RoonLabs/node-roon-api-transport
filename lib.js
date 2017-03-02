@@ -56,7 +56,19 @@ function zoid(zo) {
  * @property {('selected'|'deselected'|'standby'|'indeterminate')} source_controls.status
  * @property {boolean}  source_controls.supports_standby - true if this source control supports standby
  *
- * @property {object}  [volume] - This field is populated for outputs that support volume control
+ * @property {object}  [volume] - This field is populated for outputs that support volume control.<p style='white-space: pre-wrap;'>
+ * Note that volume values, bounds, and step are floating point values, not integers, and that volume ranges can extend below and above zero, sometimes at the same time.
+ *
+ * Examples:
+ *
+ * This list of examples is not meant to be exhaustive--it just serves to create a sense of the range of options out there.
+ * <pre>
+ *     { "type": "db",    "min": -80, "max": 0,   "value": -50.5, "step": 0.5 }
+ *     { "type": "db",    "min": -80, "max": 10,  "value": 4,     "step": 1.0 }
+ *     { "type": "number" "min": 0,   "max": 100, "value": 80,    "step": 1.0 }
+ *     { "type": "number" "min": 1,   "max": 99,  "value": 65,    "step": 1.0 }
+ * </pre>
+ * </pre>
  * @property {('number'|'db'|*)}  [volume.type] - If you receive an unanticipated value for this, treat it like "number"
  * @property {number}  [volume.min] - The minimum value in the volume range
  * @property {number}  [volume.max] - The maximum value in the volume range
