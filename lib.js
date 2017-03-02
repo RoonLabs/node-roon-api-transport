@@ -157,7 +157,7 @@ RoonApiTransport.prototype.change_volume = function(output, how, value, cb) {
 };
 /**
  * Seek to a time position within the now playing media
- * @param {Zone} zone - The zone or output
+ * @param {Zone|Output} zone - The zone or output
  * @param {('relative'|'absolute')} how - How to interpret the target seek position
  * @param {number} seconds - The target seek position
  * @param {RoonApiTransport~resultcallback} [cb] - Called on success or error
@@ -180,7 +180,7 @@ RoonApiTransport.prototype.seek = function(z, how, seconds, cb) {
  *
  * <p>Be sure that `is_<control>_allowed` is true on your {Zone} before allowing the user to operate controls</p>
  *
- * @param {Zone} zone - The zone or output
+ * @param {Zone|Output} zone - The zone or output
  * @param {('play'|'pause'|'playpause'|'stop'|'previous'|'next')} control - The control desired
  * <pre>
  * "play" - If paused or stopped, start playback
@@ -208,8 +208,8 @@ RoonApiTransport.prototype.control = function(z, control, cb) {
 /**
  * Transfer the current queue from one zone to another
  *
- * @param {Zone} fromzone - The source zone or output
- * @param {Zone} tozone - The destination zone or output
+ * @param {Zone|Output} fromzone - The source zone or output
+ * @param {Zone|Output} tozone - The destination zone or output
  * @param {RoonApiTransport~resultcallback} [cb] - Called on success or error
  */
 RoonApiTransport.prototype.transfer_zone = function(fromz, toz, cb) {
@@ -261,7 +261,7 @@ RoonApiTransport.prototype.ungroup_outputs = function(outputs, cb) {
 /**
  * Change zone settings
  *
- * @param {Zone} zone - The zone or output
+ * @param {Zone|Output} zone - The zone or output
  * @param {object} settings - The settings to change
  * @param {boolean} [settings.shuffle] - If present, sets shuffle mode to the specified value
  * @param {boolean} [settings.auto_radio] - If present, sets auto_radio mode to the specified value
