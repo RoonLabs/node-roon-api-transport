@@ -121,7 +121,7 @@ RoonApiTransport.prototype.pause_all = function(cb) {
  * @param {RoonApiTransport~resultcallback} [cb] - Called on success or error
  */
 RoonApiTransport.prototype.mute = function(output, how, cb) {
-    if (!z) { if (cb) cb(false); return; }
+    if (!output) { if (cb) cb(false); return; }
     this.core.moo.send_request(SVCNAME+"/mute",
                                {
                                    output_id: oid(output),
@@ -143,7 +143,7 @@ RoonApiTransport.prototype.mute = function(output, how, cb) {
  * @param {RoonApiTransport~resultcallback} [cb] - Called on success or error
  */
 RoonApiTransport.prototype.change_volume = function(output, how, value, cb) {
-    if (!z) { if (cb) cb(false); return; }
+    if (!output) { if (cb) cb(false); return; }
     this.core.moo.send_request(SVCNAME+"/change_volume",
                                {
                                    output_id: oid(output),
