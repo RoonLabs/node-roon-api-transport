@@ -19,7 +19,7 @@ function zoid(zo) {
  * @property {string}  display_name - Display Name for this zone
  * @property {Output[]}  ouputs - The outputs in this zone
  * @property {('playing'|'paused'|'loading'|'stopped')} state
- * @property {number} [seek_poisition] - Current seek position for the zone
+ * @property {number} [seek_position] - Current seek position for the zone
  * @property {boolean} is_previous_allowed - Indicates whether the "previous" control is supported
  * @property {boolean} is_next_allowed - Indicates whether the "next" control is supported
  * @property {boolean} is_pause_allowed - Indicates whether the "pause" control is supported
