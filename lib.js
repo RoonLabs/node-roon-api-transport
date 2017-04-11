@@ -115,6 +115,57 @@ RoonApiTransport.prototype.pause_all = function(cb) {
                                });
 };
 /**
+ * Standby an output.
+ *
+ * @param {Output} output - The output to put into standby
+ * @param {object} opts - Options. If none, specify empty object ({}).
+ * @param {string} [opts.control_key] - The <tt>control_key</tt> that identifies the <tt>source_control</tt> that is to be put into standby. If omitted, then all source controls on this output that support standby will be put into standby.
+ * @param {RoonApiTransport~resultcallback} [cb] - Called on success or error
+ */
+RoonApiTransport.prototype.standby = function(o, opts, cb) {
+    if (!z) { if (cb) cb(false); return; }
+    opts = Object.assign({ output_id: oid(o) }, opts);
+    this.core.moo.send_request(SVCNAME+"/standby", opts,
+                               (msg, body) => {
+                                   if (cb)
+                                       cb(msg && msg.name == "Success" ? false : (msg ? msg.name : "NetworkError"));
+                               });
+};
+/**
+ * Toggle the standby state of an output.
+ *
+ * @param {Output} output - The output that should have its standby state toggled.
+ * @param {object} opts - Options. If none, specify empty object ({}).
+ * @param {string} [opts.control_key] - The <tt>control_key</tt> that identifies the <tt>source_control</tt> that is to have its standby state toggled.
+ * @param {RoonApiTransport~resultcallback} [cb] - Called on success or error
+ */
+RoonApiTransport.prototype.standby = function(o, opts, cb) {
+    if (!z) { if (cb) cb(false); return; }
+    opts = Object.assign({ output_id: oid(o) }, opts);
+    this.core.moo.send_request(SVCNAME+"/toggle_standby", opts,
+                               (msg, body) => {
+                                   if (cb)
+                                       cb(msg && msg.name == "Success" ? false : (msg ? msg.name : "NetworkError"));
+                               });
+};
+/**
+ * Cconvenience switch an output, taking it out of standby if needed.
+ *
+ * @param {Output} output - The output that should be convenience-switched.
+ * @param {object} opts - Options. If none, specify empty object ({}).
+ * @param {string} [opts.control_key] - The <tt>control_key</tt> that identifies the <tt>source_control</tt> that is to be switched. If omitted, then all controls on this output will be convenience switched.
+ * @param {RoonApiTransport~resultcallback} [cb] - Called on success or error
+ */
+RoonApiTransport.prototype.convenience_switch = function(o, opts, cb) {
+    if (!z) { if (cb) cb(false); return; }
+    opts = Object.assign({ output_id: oid(o) }, opts);
+    this.core.moo.send_request(SVCNAME+"/convenience_switch", opts,
+                               (msg, body) => {
+                                   if (cb)
+                                       cb(msg && msg.name == "Success" ? false : (msg ? msg.name : "NetworkError"));
+                               });
+};
+/**
  * Mute/unmute an output.
  * @param {Output} output - The output to mute.
  * @param {('mute'|'unmute')} how - The action to take
