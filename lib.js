@@ -123,7 +123,7 @@ RoonApiTransport.prototype.pause_all = function(cb) {
  * @param {RoonApiTransport~resultcallback} [cb] - Called on success or error
  */
 RoonApiTransport.prototype.standby = function(o, opts, cb) {
-    if (!z) { if (cb) cb(false); return; }
+    if (!o) { if (cb) cb(false); return; }
     opts = Object.assign({ output_id: oid(o) }, opts);
     this.core.moo.send_request(SVCNAME+"/standby", opts,
                                (msg, body) => {
@@ -139,8 +139,8 @@ RoonApiTransport.prototype.standby = function(o, opts, cb) {
  * @param {string} [opts.control_key] - The <tt>control_key</tt> that identifies the <tt>source_control</tt> that is to have its standby state toggled.
  * @param {RoonApiTransport~resultcallback} [cb] - Called on success or error
  */
-RoonApiTransport.prototype.standby = function(o, opts, cb) {
-    if (!z) { if (cb) cb(false); return; }
+RoonApiTransport.prototype.toggle_standby = function(o, opts, cb) {
+    if (!o) { if (cb) cb(false); return; }
     opts = Object.assign({ output_id: oid(o) }, opts);
     this.core.moo.send_request(SVCNAME+"/toggle_standby", opts,
                                (msg, body) => {
@@ -157,7 +157,7 @@ RoonApiTransport.prototype.standby = function(o, opts, cb) {
  * @param {RoonApiTransport~resultcallback} [cb] - Called on success or error
  */
 RoonApiTransport.prototype.convenience_switch = function(o, opts, cb) {
-    if (!z) { if (cb) cb(false); return; }
+    if (!o) { if (cb) cb(false); return; }
     opts = Object.assign({ output_id: oid(o) }, opts);
     this.core.moo.send_request(SVCNAME+"/convenience_switch", opts,
                                (msg, body) => {
