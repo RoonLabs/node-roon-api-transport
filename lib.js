@@ -334,14 +334,14 @@ RoonApiTransport.prototype.get_zones = function(cb) {
     this.core.moo.send_request(SVCNAME+"/get_zones",
                                (msg, body) => {
                                    if (cb)
-                                       cb(msg && msg.name == "Success" ? false : (msg ? msg.name : "NetworkError"), msg.body);
+                                       cb(msg && msg.name == "Success" ? false : (msg ? msg.name : "NetworkError"), body);
                                });
 };
 RoonApiTransport.prototype.get_outputs = function(cb) {
     this.core.moo.send_request(SVCNAME+"/get_outputs",
                                (msg, body) => {
                                    if (cb)
-                                       cb(msg && msg.name == "Success" ? false : (msg ? msg.name : "NetworkError"), msg.body);
+                                       cb(msg && msg.name == "Success" ? false : (msg ? msg.name : "NetworkError"), body);
                                });
 };
 
