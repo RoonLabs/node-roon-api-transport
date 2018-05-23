@@ -1,6 +1,6 @@
 "use strict";
 
-let SVCNAME = "com.roonlabs.transport:1";
+let SVCNAME = "com.roonlabs.transport:2";
 
 function oid(o) {
     if (typeof(o) == 'string') return o;
@@ -84,6 +84,7 @@ function zoid(zo) {
  */
 function RoonApiTransport(core) {
     this.core = core;
+    this._queues = { };
 }
 
 RoonApiTransport.services = [ { name: SVCNAME } ];
@@ -353,15 +354,44 @@ RoonApiTransport.prototype.subscribe_zones    = function(cb) {
                                             this._zones = msg.zones.reduce((p,e) => (p[e.zone_id] = e) && p, {});
 
                                         } else if (response == "Changed") {
-                                            if (msg.zones_removed) msg.zones_removed.forEach(e => delete(this._zones[e.zone_id]));
-                                            if (msg.zones_added)   msg.zones_added  .forEach(e => this._zones[e.zone_id] = e);
-                                            if (msg.zones_changed) msg.zones_changed.forEach(e => this._zones[e.zone_id] = e);
-
+                                            if (msg.zones_removed)      msg.zones_removed.forEach(e => delete(this._zones[e.zone_id]));
+                                            if (msg.zones_added)        msg.zones_added  .forEach(e => this._zones[e.zone_id] = e);
+                                            if (msg.zones_changed)      msg.zones_changed.forEach(e => this._zones[e.zone_id] = e);
+                                            
+                                            if (msg.zones_seek_changed) msg.zones_seeked_changed.forEach(e => update_zone(this._zones[e.zone_id], e));
+                                            
                                         } else if (response == "Unsubscribed") {
                                             delete(this._zones);
                                         }
                                         cb(response, msg);
                                     });
+}
+
+RoonApiTransport.prototype.subscribe_queue = function(zone_or_output, max_item_count, cb) {
+    var zone_or_output_id = zoid(zone_or_output);
+    return this.core.moo._subscribe_helper(SVCNAME, "queue",
+                                           {
+                                               zone_or_output_id: zone_or_output_id,
+                                               max_item_count: max_item_count
+                                           },
+                                           (response, msg) => {
+                                               cb(response, msg);
+                                           });
+}
+
+RoonApiTransport.prototype.play_from_here = function(zone_or_output, queue_item_id, cb) {
+    var zone_or_output_id = zoid(zone_or_output);
+    var req_args = {
+        zone_or_output_id: zone_or_output_id,
+        queue_item_id: queue_item_id
+    };
+    this.core.moo.send_request(SVCNAME+"/play_from_here",
+                               req_args,
+                               (msg, body) => {
+                                   if (cb)
+                                       cb(msg, body);
+                                   
+                               });
 }
 
 RoonApiTransport.prototype.zone_by_zone_id = function(zone_id) {
@@ -378,6 +408,14 @@ RoonApiTransport.prototype.zone_by_object = function(zone_or_output) {
     if (zone_or_output.zone_id)   return this.zone_by_zone_id  (zone_or_output.zone_id);
     if (zone_or_output.output_id) return this.zone_by_output_id(zone_or_output.output_id);
     return null;
+}
+
+function update_zone(old_zone, updates) {
+    if (old_zone.zone_id != updates.zone_id) return;
+    if (old_zone.now_playing != undefined) {
+        old_zone.now_playing.seek_position = updates.seek_position
+    }
+    old_zone.queue_time_remaining = updates.queue_time_remaining;
 }
 
 exports = module.exports = RoonApiTransport;
