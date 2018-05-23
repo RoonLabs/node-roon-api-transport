@@ -358,7 +358,7 @@ RoonApiTransport.prototype.subscribe_zones    = function(cb) {
                                             if (msg.zones_added)        msg.zones_added  .forEach(e => this._zones[e.zone_id] = e);
                                             if (msg.zones_changed)      msg.zones_changed.forEach(e => this._zones[e.zone_id] = e);
                                             
-                                            if (msg.zones_seek_changed) msg.zones_seeked_changed.forEach(e => update_zone(this._zones[e.zone_id], e));
+                                            if (msg.zones_seek_changed) msg.zones_seek_changed.forEach(e => update_zone(this._zones[e.zone_id], e));
                                             
                                         } else if (response == "Unsubscribed") {
                                             delete(this._zones);
