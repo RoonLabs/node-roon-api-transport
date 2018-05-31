@@ -25,6 +25,8 @@ function zoid(zo) {
  * @property {boolean} is_pause_allowed - Indicates whether the "pause" control is supported
  * @property {boolean} is_play_allowed - Indicates whether the "play" control is supported
  * @property {boolean} is_seek_allowed - Indicates whether the "seek" control is supported
+ * @property {number} [queue_items_remaining] - Number of items in the play queue for this zone
+ * @property {number} [queue_time_remaining] - Number of seconds remaining in the play queue for this zone
  * @property {object}  [settings]               - The default values for parties.
  * @property {('loop'|'loop_one'|'disabled')} settings.loop - loop setting on the zone
  * @property {boolean}  settings.shuffle - indicates whether shuffle is enabled on the zone
@@ -34,14 +36,15 @@ function zoid(zo) {
  * @property {number}  [now_playing.length] - Length of media in seconds, if applicable
  * @property {string}  [now_playing.image_key] - Now-playing image
  * @property {object}  now_playing.one_line - Display text for one-line displays
- * @property {object}  now_playing.one_line.line1
+ * @property {string}  now_playing.one_line.line1
  * @property {object}  now_playing.two_line - Display text for two-line displays
- * @property {object}  now_playing.two_line.line1
- * @property {object}  [now_playing.two_line.line2]
+ * @property {string}  now_playing.two_line.line1
+ * @property {string}  [now_playing.two_line.line2]
  * @property {object}  now_playing.three_line - Display text for three-line displays
- * @property {object}  now_playing.three_line.line1
- * @property {object}  [now_playing.three_line.line2]
- * @property {object}  [now_playing.three_line.line3]
+ * @property {string}  now_playing.three_line.line1
+ * @property {string}  [now_playing.three_line.line2]
+ * @property {string}  [now_playing.three_line.line3]
+
  */
 
 /**
@@ -67,9 +70,10 @@ function zoid(zo) {
  *     { "type": "db",    "min": -80, "max": 10,  "value": 4,     "step": 1.0 }
  *     { "type": "number" "min": 0,   "max": 100, "value": 80,    "step": 1.0 }
  *     { "type": "number" "min": 1,   "max": 99,  "value": 65,    "step": 1.0 }
+ *     { "type": "incremental" }
  * </pre>
  * </pre>
- * @property {('number'|'db'|*)}  [volume.type] - If you receive an unanticipated value for this, treat it like "number"
+ * @property {('number'|'db'|'incremental'|*)}  [volume.type] - If you receive an unanticipated value for this, treat it like "number".  The "incremental" type represents a volume control that just has "+" and "-" buttons, with no feedback about the current volume value or its range. It might be used in conjunction with an IR blaster, for example. In this case, all of the remaining properties (min,max,step,value,is_muted,limits) will be absent. With an "incremental" control, you should display two buttons, and when issuing change_volume requests, use "relative" mode and only send adjustments of +1/-1.
  * @property {number}  [volume.min] - The minimum value in the volume range
  * @property {number}  [volume.max] - The maximum value in the volume range
  * @property {number}  [volume.value] - The current value of the volume control
