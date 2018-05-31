@@ -358,7 +358,12 @@ RoonApiTransport.prototype.subscribe_zones    = function(cb) {
                                             if (msg.zones_added)        msg.zones_added  .forEach(e => this._zones[e.zone_id] = e);
                                             if (msg.zones_changed)      msg.zones_changed.forEach(e => this._zones[e.zone_id] = e);
                                             
-                                            if (msg.zones_seek_changed) msg.zones_seek_changed.forEach(e => update_zone(this._zones[e.zone_id], e));
+                                            if (msg.zones_seek_changed) msg.zones_seek_changed.forEach(e => {
+                                                let zone = this._zones[e.zone_id];
+                                                if (zone == undefined) return;
+                                                if (zone.now_playing != undefined) zone.now_playing.seek_position = e.seek_position
+                                                zone.queue_time_remaining = e.queue_time_remaining;
+                                            });
                                             
                                         } else if (response == "Unsubscribed") {
                                             delete(this._zones);
@@ -408,14 +413,6 @@ RoonApiTransport.prototype.zone_by_object = function(zone_or_output) {
     if (zone_or_output.zone_id)   return this.zone_by_zone_id  (zone_or_output.zone_id);
     if (zone_or_output.output_id) return this.zone_by_output_id(zone_or_output.output_id);
     return null;
-}
-
-function update_zone(old_zone, updates) {
-    if (old_zone.zone_id != updates.zone_id) return;
-    if (old_zone.now_playing != undefined) {
-        old_zone.now_playing.seek_position = updates.seek_position
-    }
-    old_zone.queue_time_remaining = updates.queue_time_remaining;
 }
 
 exports = module.exports = RoonApiTransport;
