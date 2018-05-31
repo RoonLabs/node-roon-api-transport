@@ -1,7 +1,7 @@
 {
   "name": "node-roon-api-transport",
-  "version": "1.0.0",
-  "description": "Roon Api Transport Service (com.roonlabs.transport:1)",
+  "version": "1.1.0",
+  "description": "Roon Api Transport Service (com.roonlabs.transport:2)",
   "main": "lib.js",
   "author": "Roon Labs, LLC",
   "license": "Apache-2.0"
